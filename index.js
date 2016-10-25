@@ -1,4 +1,5 @@
 'use strict';
+const Path = require('path');
 const GitLogEmitter = require('gitlog-emitter');
 const Insync = require('insync');
 
@@ -7,7 +8,8 @@ if (!process.argv[2]) {
   process.exit(1);
 }
 
-const { repos, emails, startDate, endDate } = require(process.argv[2]);
+const configPath = Path.resolve(process.cwd(), process.argv[2]);
+const { repos, emails, startDate, endDate } = require(configPath);
 const results = {};
 
 // Setup the result object
