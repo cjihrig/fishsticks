@@ -1,14 +1,41 @@
 'use strict';
 const Path = require('path');
+const Bossy = require('bossy');
 const GitLogEmitter = require('gitlog-emitter');
 const Insync = require('insync');
 
-if (!process.argv[2]) {
-  console.error('usage: node index.js config_file');
+const cli = {
+  'c': {
+    description: 'config file',
+    alias: 'config',
+    type: 'string',
+    require: true,
+    multiple: false
+  },
+  'r': {
+    description: 'output report format',
+    alias: 'report',
+    type: 'string',
+    require: false,
+    multiple: false,
+    default: 'summary',
+    valid: ['summary', 'json']
+  }
+};
+
+const reporters = {
+  summary: reportSummary,
+  json: reportJson
+};
+
+const args = Bossy.parse(cli);
+
+if (args instanceof Error) {
+  console.error(Bossy.usage(cli, 'fishsticks options'));
   process.exit(1);
 }
 
-const configPath = Path.resolve(process.cwd(), process.argv[2]);
+const configPath = Path.resolve(process.cwd(), args.config);
 const { repos, emails, startDate, endDate } = require(configPath);
 const results = { repos: {} };
 
@@ -52,18 +79,7 @@ Insync.each(repos, function repoIter (repo, next) {
     throw err;
   }
 
-  repos.forEach((repo) => {
-    const res = results.repos[repo];
-
-    console.log(`There were ${res.total.length} total commits to ${repo}.`);
-
-    emails.forEach((email) => {
-      const stats = res.users[email];
-
-      console.log(`\t${email} authored ${stats.author.length} commits.`);
-      console.log(`\t${email} reviewed ${stats.reviewer.length} commits.`);
-    });
-  });
+  reporters[args.report]();
 });
 
 
@@ -100,4 +116,25 @@ function getReviewerEmails (message) {
   }).map((line) => {
     return getEmail(line);
   });
+}
+
+
+function reportSummary () {
+  repos.forEach((repo) => {
+    const res = results.repos[repo];
+
+    console.log(`There were ${res.total.length} total commits to ${repo}.`);
+
+    emails.forEach((email) => {
+      const stats = res.users[email];
+
+      console.log(`\t${email} authored ${stats.author.length} commits.`);
+      console.log(`\t${email} reviewed ${stats.reviewer.length} commits.`);
+    });
+  });
+}
+
+
+function reportJson () {
+  console.log(JSON.stringify(results));
 }

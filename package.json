@@ -24,6 +24,7 @@
     "fishsticks": "./index.js"
   },
   "dependencies": {
+    "bossy": "3.0.2",
     "gitlog-emitter": "1.0.0",
     "insync": "2.1.1"
   },

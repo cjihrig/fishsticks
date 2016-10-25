@@ -13,7 +13,16 @@ Create a JavaScript file that exports a configuration object with the following 
 - `startDate` (date) - Only report commits that occurred on, or after this date. This value is optional. If it is not included, the start date is assumed to be the beginning of time.
 - `endDate` (date) - Only report commits that occurred on, or before this date. This value is optional. If it is not included, the end date is assumed to be the end of time.
 
-Next, run `node index.js path-to-config-file`. The application will walk the git log of each repository. For each email address, the number of relevant authored and reviewed commits will be reported.
+Next, run `fishsticks -c path-to-config-file.js`. The application will walk the git log of each repository. For each email address, the number of relevant authored and reviewed commits will be reported.
+
+### CLI Options
+
+fishsticks supports the following command line options:
+
+- `-c`, `--config` (string) - The path to the configuration file.
+- `-r`, `--report` (string) - The format of the output. Optional. Supported formats are:
+  - `summary` - Simple textual description of the number of commits. This is the default.
+  - `json` - A JSON representation containing the full commit data.
 
 ### Sample Config File
 
