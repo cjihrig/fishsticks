@@ -20,6 +20,9 @@
   "engines": {
     "node": ">=6.0.0"
   },
+  "bin": {
+    "fishsticks": "./index.js"
+  },
   "dependencies": {
     "gitlog-emitter": "1.0.0",
     "insync": "2.1.1"
