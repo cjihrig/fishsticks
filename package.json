@@ -1,6 +1,6 @@
 {
   "name": "fishsticks",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Parse Node core compatible git info",
   "author": "Colin J. Ihrig <cjihrig@gmail.com> (http://www.cjihrig.com/)",
   "main": "index.js",
