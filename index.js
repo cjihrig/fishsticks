@@ -10,35 +10,38 @@ if (!process.argv[2]) {
 
 const configPath = Path.resolve(process.cwd(), process.argv[2]);
 const { repos, emails, startDate, endDate } = require(configPath);
-const results = {};
+const results = { repos: {} };
 
 // Setup the result object
-emails.forEach((email) => {
-  results[email] = {};
-  repos.forEach((repo) => {
-    results[email][repo] = { author: [], reviewer: [] };
+repos.forEach((repo) => {
+  results.repos[repo] = { users: {}, total: [] };
+  emails.forEach((email) => {
+    results.repos[repo].users[email] = { author: [], reviewer: [] };
   });
 });
 
 
 Insync.each(repos, function repoIter (repo, next) {
   const ee = new GitLogEmitter({ repo });
+  const res = results.repos[repo];
 
   ee.on('commit', (commit) => {
     if (!inDateRange(commit.date)) {
       return;
     }
 
+    res.total.push(commit);
+
     const author = getEmail(commit.author);
     const reviewers = getReviewerEmails(commit.message);
 
     emails.forEach((email) => {
       if (email === author) {
-        results[email][repo].author.push(commit);
+        res.users[email].author.push(commit);
       }
 
       if (reviewers.indexOf(email) > -1) {
-        results[email][repo].reviewer.push(commit);
+        res.users[email].reviewer.push(commit);
       }
     });
   });
@@ -49,11 +52,16 @@ Insync.each(repos, function repoIter (repo, next) {
     throw err;
   }
 
-  emails.forEach((email) => {
-    repos.forEach((repo) => {
-      const stats = results[email][repo];
+  repos.forEach((repo) => {
+    const res = results.repos[repo];
 
-      console.log(`${email} authored ${stats.author.length} commits and reviewed ${stats.reviewer.length} commits in ${repo}`);
+    console.log(`There were ${res.total.length} total commits to ${repo}.`);
+
+    emails.forEach((email) => {
+      const stats = res.users[email];
+
+      console.log(`\t${email} authored ${stats.author.length} commits.`);
+      console.log(`\t${email} reviewed ${stats.reviewer.length} commits.`);
     });
   });
 });
